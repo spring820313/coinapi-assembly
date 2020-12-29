@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CoinApi Test</title>
+</head>
+<body>
+<span style="font-size: 50px;">CoinApi Test</span>
+<script src="coinapi.wasm.js"></script>
+<script>
+    Module.onRuntimeInitialized = _ => {
+        const api = new Module.CoinApi()
+
+        const r = api.createAllCoinMnemonicCode()
+        console.log(r.size());
+
+        console.log("Value: ", r);
+
+        const keyPath = new Module.KeyPath()
+        keyPath.symbol = "BTC"
+        keyPath.path1 = 44
+        keyPath.hd1 = true
+        keyPath.path2 = 0
+        keyPath.hd2 = true
+        keyPath.path3 = 0
+        keyPath.hd3 = true
+        keyPath.path4 = 0
+        keyPath.hd4 = false
+        keyPath.path5 = 0
+        keyPath.hd5 = false
+
+        const netParams = new Module.NetParams()
+        netParams.symbol = "BTC"
+        netParams.coinType = Module.CoinType.BTC
+        netParams.nettype = Module.NetworkType.TEST
+        netParams.version = 0
+        netParams.ApiVersion = 2
+        netParams.HDprivate = 0x04358394
+        netParams.HDpublic = 0x043587CF
+        netParams.P2KH = 0x6f
+        netParams.P2SH = 0xC4
+        netParams.keyprefixes = 239
+        netParams.N = 32768
+        netParams.R = 8
+        netParams.P = 1
+        netParams.keyPath = keyPath
+
+
+        const mne = "accuse foot someone section traffic neck celery mammal helmet obey barely credit"
+        const password = "12345"
+
+        var wallet = new Module.BtWallet()
+        var ret = api.createWallet(mne, password, netParams, wallet)
+        console.log("Ret: ", ret);
+
+        console.log(wallet)
+        console.log(wallet.address)
+        console.log(wallet.pubkey)
+        console.log(wallet.getBtSeed())
+
+        var signParams = new Module.BtcCreateSignTransactionParams()
+        signParams.password = password
+        signParams.priKey = "cVEUXNwrQ2NGPyuY38iTpdh4mCdcb4558fR5hyoEyv5qWocrP8VR"
+        signParams.feePerKb = "10000"
+        signParams.fromAddress = "2Mw5UYkwkSAKn2UyJJUsE6LsxzPiDz3yAvn"
+        signParams.sendAddress = "2N8WytPzsrsBySAfRxBRgqSPhX6e5xc6nRw"
+        signParams.sendValue = "100000000"
+
+        var vout1 = new Module.BtcvoutForm()
+        vout1.hash = "a8954a592c5815d3938d51b778320727ca277a94b7b31030d3bbe996e8de9dce"
+        vout1.value = "1000000000"
+        vout1.n = 0
+        vout1.coinBase = false
+
+        var vec = new Module.vectorOut()
+        vec.push_back(vout1)
+        signParams.btcvoutFormList = vec
+        signParams.txType = Module.TxType.NONE
+
+        console.log(vec)
+        console.log(signParams)
+
+        var map = new Module.mapString()
+        ret = api.createSignTransaction(signParams, netParams, map)
+
+        console.log("Ret: ", ret)
+        console.log(map)
+
+        // map size
+        var mapSize = map.size();
+        console.log("Map Size: ", mapSize)
+
+        var mapKeys = map.keys();
+        for (var i = 0; i < mapKeys.size(); i++) {
+            var key = mapKeys.get(i);
+            console.log("Map key/value: ", key, map.get(key))
+        }
+
+    };
+</script>
+
+</body>
+</html>
